@@ -4,66 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>System Resource Monitor</title>
+    <!-- Include Chart.js library for drawing line graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* Reset default browser margins and padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333333;
             padding: 20px;
-            color: #fff;
+            line-height: 1.5;
         }
         
-        .container { max-width: 1800px; margin: 0 auto; }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
         
+        /* Main page header section */
         .header {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            padding: 30px;
-            border-radius: 15px;
+            background-color: #3182ce;
+            color: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
             margin-bottom: 25px;
             text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
-        .header h1 { font-size: 32px; margin-bottom: 10px; }
-        .header p { font-size: 16px; opacity: 0.9; }
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
         
+        .header p {
+            font-size: 15px;
+            opacity: 0.95;
+            margin-bottom: 12px;
+        }
+        
+        /* Badges for subjects/topics */
         .subjects {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-top: 15px;
+            gap: 12px;
+            margin-top: 10px;
             flex-wrap: wrap;
         }
         
         .subject {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 6px 16px;
             border-radius: 20px;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 500;
+            color: #ffffff;
         }
         
+        /* Server status label */
         .status-bar {
             margin-top: 15px;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .status-dot {
             display: inline-block;
             width: 10px;
             height: 10px;
-            background: #10b981;
+            background-color: #48bb78;
             border-radius: 50%;
             margin-right: 8px;
-            animation: pulse 2s infinite;
+            animation: blink 2s infinite;
         }
         
-        @keyframes pulse {
+        @keyframes blink {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.4; }
         }
         
+        /* Grid layout for cards */
         .grid { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
@@ -71,123 +101,166 @@
             margin-bottom: 25px;
         }
         
+        /* Standard card container */
         .card {
-            background: #1a1d29;
-            border-radius: 15px;
-            padding: 25px;
-            border: 1px solid #2d3748;
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         
         .card-title {
-            font-size: 18px;
-            color: #8b92a7;
-            margin-bottom: 15px;
+            font-size: 15px;
+            color: #4a5568;
+            margin-bottom: 12px;
             text-transform: uppercase;
-            font-weight: 900;
+            font-weight: 700;
             letter-spacing: 0.5px;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 6px;
         }
         
         .metric-value {
-            font-size: 42px;
+            font-size: 36px;
             font-weight: 700;
-            color: #667eea;
-            margin-bottom: 10px;
+            color: #2b6cb0;
+            margin-bottom: 8px;
         }
         
+        /* Custom progress bar */
         .progress {
             width: 100%;
-            height: 10px;
-            background: #2d3748;
-            border-radius: 10px;
+            height: 12px;
+            background-color: #edf2f7;
+            border-radius: 6px;
             overflow: hidden;
-            margin-top: 12px;
+            border: 1px solid #cbd5e0;
+            margin-top: 10px;
         }
         
         .progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            transition: width 0.6s ease;
+            background-color: #3182ce;
+            width: 0%;
+            transition: width 0.4s ease;
         }
         
-        .chart-container { height: 280px; margin-top: 15px; }
+        /* Canvas charts */
+        .chart-container {
+            position: relative;
+            height: 280px;
+            margin-top: 10px;
+        }
         
         .wide { grid-column: span 2; }
         .full { grid-column: span 4; }
         
+        /* Table Styles */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 10px;
+            background-color: #ffffff;
         }
         
         th {
             text-align: left;
-            padding: 12px;
-            background: #2d3748;
-            color: #8b92a7;
+            padding: 10px;
+            background-color: #edf2f7;
+            color: #4a5568;
             font-size: 12px;
             text-transform: uppercase;
-            font-weight: 600;
+            font-weight: 700;
+            border: 1px solid #cbd5e0;
         }
         
         td {
-            padding: 12px;
-            border-bottom: 1px solid #2d3748;
-            font-size: 14px;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            font-size: 13px;
         }
         
-        tr:hover { background: #2d3748; }
+        tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
         
+        tr:hover {
+            background-color: #edf2f7;
+        }
+        
+        /* CPU Core Items layout */
         .core-item {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-size: 13px;
         }
         
         .core-bar {
             flex: 1;
-            height: 8px;
-            background: #2d3748;
+            height: 10px;
+            background-color: #edf2f7;
             border-radius: 4px;
+            border: 1px solid #cbd5e0;
             overflow: hidden;
         }
         
         .core-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            transition: width 0.5s;
+            background-color: #4299e1;
+            width: 0%;
+            transition: width 0.4s;
         }
         
+        /* System Alerts styling */
         .alert {
-            padding: 12px;
+            padding: 10px;
             margin-bottom: 10px;
-            border-radius: 8px;
+            border-radius: 6px;
             border-left: 4px solid;
             font-size: 13px;
         }
         
-        .alert-warning { background: #3d2a00; border-color: #f59e0b; color: #fbbf24; }
-        .alert-danger { background: #3d0000; border-color: #ef4444; color: #f87171; }
-        .alert-info { background: #002d3d; border-color: #3b82f6; color: #60a5fa; }
+        .alert-warning {
+            background-color: #feebc8;
+            border-color: #dd6b20;
+            color: #744210;
+        }
         
-        .mem-detail { margin-bottom: 18px; }
+        .alert-danger {
+            background-color: #fed7d7;
+            border-color: #e53e3e;
+            color: #742a2a;
+        }
+        
+        .alert-info {
+            background-color: #ebf8ff;
+            border-color: #3182ce;
+            color: #2b6cb0;
+        }
+        
+        /* Memory layout styling */
+        .mem-detail {
+            margin-bottom: 15px;
+        }
         
         .mem-label {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             font-size: 13px;
             font-weight: 600;
         }
         
-        @media (max-width: 1400px) {
+        /* Responsive CSS */
+        @media (max-width: 1024px) {
             .grid { grid-template-columns: repeat(2, 1fr); }
             .wide, .full { grid-column: span 2; }
         }
         
-        @media (max-width: 768px) {
+        @media (max-width: 600px) {
             .grid { grid-template-columns: 1fr; }
             .wide, .full { grid-column: span 1; }
         }
@@ -195,211 +268,299 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
+        <!-- Dashboard Header -->
         <div class="header">
-            <h1>🖥️ Intelligent System Resource Monitoring</h1>
-            <p>Using ML, OS Metrics, DBMS, and Algorithm Analysis</p>
+            <h1>🖥️ System Resource Monitor</h1>
+            <p>Lab Project: Operating Systems & Database Management System</p>
             <div class="subjects">
-                <div class="subject">Operating System</div>
-                <div class="subject">MySQL Database</div>
-                <div class="subject">Machine Learning</div>
+                <div class="subject">Operating System Metrics</div>
+                <div class="subject">SQLite Database</div>
+                <div class="subject">Machine Learning Predictions</div>
                 <div class="subject">Algorithm Analysis</div>
             </div>
             <div class="status-bar">
                 <span class="status-dot"></span>
-                <span>System Active | Last Update: <strong id="time">--:--:--</strong></span>
+                <span>Monitor Active | Last Updated: <strong id="time">--:--:--</strong></span>
             </div>
         </div>
 
-        <!-- Metrics -->
+        <!-- Main Real-Time Progress Metrics -->
         <div class="grid">
             <div class="card">
-                <div class="card-title">CPU Usage</div>
+                <div class="card-title">CPU Utilization</div>
                 <div class="metric-value" id="cpu">0%</div>
-                <div class="progress"><div class="progress-bar" id="cpu-bar"></div></div>
+                <div class="progress">
+                    <div class="progress-bar" id="cpu-bar"></div>
+                </div>
             </div>
             <div class="card">
-                <div class="card-title">Memory Usage</div>
+                <div class="card-title">Memory (RAM) Usage</div>
                 <div class="metric-value" id="mem">0%</div>
-                <div class="progress"><div class="progress-bar" id="mem-bar"></div></div>
+                <div class="progress">
+                    <div class="progress-bar" id="mem-bar"></div>
+                </div>
             </div>
             <div class="card">
-                <div class="card-title">Disk Usage</div>
+                <div class="card-title">Disk C: Usage</div>
                 <div class="metric-value" id="disk">0%</div>
-                <div class="progress"><div class="progress-bar" id="disk-bar"></div></div>
+                <div class="progress">
+                    <div class="progress-bar" id="disk-bar"></div>
+                </div>
             </div>
             <div class="card">
-                <div class="card-title">Network</div>
-                <div class="metric-value" style="font-size: 24px;">Active</div>
-                <div style="margin-top: 12px; font-size: 13px; color: #8b92a7;">
-                    <div>Sent: <strong id="net-sent">0 MB</strong></div>
-                    <div>Recv: <strong id="net-recv">0 MB</strong></div>
+                <div class="card-title">Network Activity</div>
+                <div class="metric-value" style="font-size: 26px; color: #2b6cb0;">Active</div>
+                <div style="margin-top: 8px; font-size: 13px;">
+                    <div>Bytes Sent: <strong id="net-sent">0 MB</strong></div>
+                    <div>Bytes Recv: <strong id="net-recv">0 MB</strong></div>
                 </div>
             </div>
         </div>
 
-        <!-- Running Processes -->
+        <!-- Processes List -->
         <div class="grid">
             <div class="card full">
-                <div class="card-title">⚡ Running Processes Monitor</div>
-                <table>
-                    <thead>
-                        <tr><th>PID</th><th>Name</th><th>CPU %</th><th>Memory %</th><th>Status</th></tr>
-                    </thead>
-                    <tbody id="procs">
-                        <tr><td colspan="5" style="text-align: center; padding: 25px;">Loading...</td></tr>
-                    </tbody>
-                </table>
+                <div class="card-title">⚡ Top Running Processes (Sorted by CPU Usage)</div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>PID</th>
+                                <th>Process Name</th>
+                                <th>CPU %</th>
+                                <th>Memory %</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="procs">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 20px;">Fetching process list from system...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- CPU & Memory -->
+        <!-- Detailed CPU Core & Memory breakdown -->
         <div class="grid">
             <div class="card wide">
-                <div class="card-title">🔥 CPU Core Utilization</div>
-                <div id="cores">Loading...</div>
+                <div class="card-title">🔥 Individual CPU Core Status</div>
+                <div id="cores" style="max-height: 250px; overflow-y: auto;">
+                    Loading core statistics...
+                </div>
             </div>
             <div class="card wide">
-                <div class="card-title">🧠 Memory Management</div>
+                <div class="card-title">🧠 Physical & Virtual Memory Management</div>
                 <div class="mem-detail">
-                    <div class="mem-label"><span>RAM</span><span id="ram-text">0 GB / 0 GB</span></div>
-                    <div class="progress"><div class="progress-bar" id="ram-bar"></div></div>
+                    <div class="mem-label">
+                        <span>Physical RAM</span>
+                        <span id="ram-text">0 GB / 0 GB</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" id="ram-bar"></div>
+                    </div>
                 </div>
                 <div class="mem-detail">
-                    <div class="mem-label"><span>Swap</span><span id="swap-text">0 GB / 0 GB</span></div>
-                    <div class="progress"><div class="progress-bar" id="swap-bar"></div></div>
+                    <div class="mem-label">
+                        <span>Swap Space</span>
+                        <span id="swap-text">0 GB / 0 GB</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" id="swap-bar"></div>
+                    </div>
                 </div>
-                <div style="font-size: 12px; color: #8b92a7; margin-top: 10px;">
-                    <div>Total: <strong id="mem-total">0 GB</strong></div>
-                    <div>Available: <strong id="mem-avail">0 GB</strong></div>
-                    <div>Used: <strong id="mem-used">0 GB</strong></div>
+                <div style="font-size: 13px; margin-top: 10px; border-top: 1px solid #edf2f7; padding-top: 8px;">
+                    <div>Total Memory: <strong id="mem-total">0 GB</strong></div>
+                    <div>Available Memory: <strong id="mem-avail">0 GB</strong></div>
+                    <div>Used Memory: <strong id="mem-used">0 GB</strong></div>
                 </div>
             </div>
         </div>
 
-        <!-- Charts -->
+        <!-- Historical Performance Charts -->
         <div class="grid">
             <div class="card full">
-                <div class="card-title">📊 Historical Data (MySQL Database)</div>
-                <div class="chart-container"><canvas id="histChart"></canvas></div>
+                <div class="card-title">📊 Historical Trends (Logged to SQLite Database)</div>
+                <div class="chart-container">
+                    <canvas id="histChart"></canvas>
+                </div>
             </div>
         </div>
 
-        <!-- Alerts & Algorithm -->
+        <!-- Alert Log & Complexity Analysis -->
         <div class="grid">
             <div class="card wide">
-                <div class="card-title">🚨 System Alerts</div>
-                <div id="alerts"><div class="alert alert-info">System running normally</div></div>
+                <div class="card-title">🚨 System Alerts (Recent Logs)</div>
+                <div id="alerts">
+                    <div class="alert alert-info">System running normally. No warnings triggered.</div>
+                </div>
             </div>
             <div class="card wide">
-                <div class="card-title">⚙️ Algorithm Analysis</div>
-                <div style="font-size: 13px; line-height: 2;">
-                    <div>Data Collection: <strong>O(1)</strong></div>
-                    <div>ML Training: <strong>O(n)</strong></div>
-                    <div>DB Queries: <strong>O(log n)</strong></div>
-                    <div>Alert Detection: <strong>O(1)</strong></div>
+                <div class="card-title">⚙️ Algorithm Time Complexity Analysis</div>
+                <div style="font-size: 14px; line-height: 1.8;">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #edf2f7; padding: 4px 0;">
+                        <span>Data Collection:</span>
+                        <strong>O(1)</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #edf2f7; padding: 4px 0;">
+                        <span>ML Training Model:</span>
+                        <strong>O(n)</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #edf2f7; padding: 4px 0;">
+                        <span>Database Queries:</span>
+                        <strong>O(log n)</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #edf2f7; padding: 4px 0;">
+                        <span>Alert Check logic:</span>
+                        <strong>O(1)</strong>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- MySQL Records -->
+        <!-- SQLite Log Table -->
         <div class="grid">
             <div class="card full">
-                <div class="card-title">🗄️ MySQL Database Records</div>
-                <table>
-                    <thead>
-                        <tr><th>ID</th><th>Timestamp</th><th>CPU %</th><th>Memory %</th><th>Disk %</th><th>Net Sent</th><th>Net Recv</th></tr>
-                    </thead>
-                    <tbody id="db-records">
-                        <tr><td colspan="7" style="text-align: center; padding: 25px;">Loading...</td></tr>
-                    </tbody>
-                </table>
+                <div class="card-title">🗄️ Database Record History (Raw Rows)</div>
+                <div style="overflow-x: auto; max-height: 300px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Timestamp</th>
+                                <th>CPU %</th>
+                                <th>Memory %</th>
+                                <th>Disk %</th>
+                                <th>Net Sent</th>
+                                <th>Net Recv</th>
+                            </tr>
+                        </thead>
+                        <tbody id="db-records">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 20px;">Retrieving database logs...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- Real-time Chart -->
+        <!-- Real-Time Trend Line Graph -->
         <div class="grid">
             <div class="card full">
-                <div class="card-title">📈 Real-Time Performance</div>
-                <div class="chart-container"><canvas id="rtChart"></canvas></div>
+                <div class="card-title">📈 Real-Time CPU & RAM Performance Trend</div>
+                <div class="chart-container">
+                    <canvas id="rtChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- JavaScript code for fetching and drawing charts -->
     <script>
         let histChart, rtChart;
         let rtData = { cpu: [], mem: [], labels: [] };
 
+        // Helper function to initialize Chart.js instances
         function initCharts() {
-            const config = {
+            // Standard chart settings for light mode
+            const chartConfig = {
                 type: 'line',
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true, max: 100, grid: { color: '#2d3748' }, ticks: { color: '#8b92a7' } },
-                        x: { grid: { color: '#2d3748' }, ticks: { color: '#8b92a7' } }
+                        y: { 
+                            beginAtZero: true, 
+                            max: 100,
+                            grid: { color: '#e2e8f0' }, 
+                            ticks: { color: '#4a5568' } 
+                        },
+                        x: { 
+                            grid: { color: '#e2e8f0' }, 
+                            ticks: { color: '#4a5568' } 
+                        }
                     },
-                    plugins: { legend: { labels: { color: '#fff' } } }
+                    plugins: { 
+                        legend: { 
+                            labels: { color: '#333' } 
+                        } 
+                    }
                 }
             };
 
+            // Historical data line chart (CPU, Memory, Disk)
             histChart = new Chart(document.getElementById('histChart'), {
-                ...config,
+                ...chartConfig,
                 data: {
                     labels: [],
                     datasets: [
-                        { label: 'CPU %', data: [], borderColor: '#ef4444', tension: 0.4 },
-                        { label: 'Memory %', data: [], borderColor: '#10b981', tension: 0.4 },
-                        { label: 'Disk %', data: [], borderColor: '#3b82f6', tension: 0.4 }
+                        { label: 'CPU %', data: [], borderColor: '#e53e3e', backgroundColor: 'transparent', tension: 0.3 },
+                        { label: 'Memory %', data: [], borderColor: '#38a169', backgroundColor: 'transparent', tension: 0.3 },
+                        { label: 'Disk %', data: [], borderColor: '#3182ce', backgroundColor: 'transparent', tension: 0.3 }
                     ]
                 }
             });
 
+            // Real-time chart showing last 15 points
             rtChart = new Chart(document.getElementById('rtChart'), {
-                ...config,
+                ...chartConfig,
                 data: {
                     labels: rtData.labels,
                     datasets: [
-                        { label: 'CPU %', data: rtData.cpu, borderColor: '#667eea', backgroundColor: 'rgba(102,126,234,0.1)', tension: 0.4, fill: true },
-                        { label: 'Memory %', data: rtData.mem, borderColor: '#764ba2', backgroundColor: 'rgba(118,75,162,0.1)', tension: 0.4, fill: true }
+                        { label: 'CPU %', data: rtData.cpu, borderColor: '#3182ce', backgroundColor: 'rgba(49,130,206,0.1)', tension: 0.3, fill: true },
+                        { label: 'Memory %', data: rtData.mem, borderColor: '#805ad5', backgroundColor: 'rgba(128,90,213,0.1)', tension: 0.3, fill: true }
                     ]
                 }
             });
         }
 
-        async function update() {
+        // Fetch data from Flask backend and update HTML elements
+        async function updateDashboard() {
             try {
-                // Current metrics
+                // 1. Fetch current system resource utilization
                 const res = await fetch('/api/current');
                 const d = await res.json();
                 
                 if (d && !d.error) {
+                    // Update Text labels
                     document.getElementById('cpu').textContent = d.cpu_percent.toFixed(1) + '%';
                     document.getElementById('mem').textContent = d.memory_percent.toFixed(1) + '%';
                     document.getElementById('disk').textContent = d.disk_percent.toFixed(1) + '%';
+                    
+                    // Update main progress bars width
                     document.getElementById('cpu-bar').style.width = d.cpu_percent + '%';
                     document.getElementById('mem-bar').style.width = d.memory_percent + '%';
                     document.getElementById('disk-bar').style.width = d.disk_percent + '%';
+                    
+                    // Convert network bytes to Megabytes
                     document.getElementById('net-sent').textContent = (d.network_sent / 1024 / 1024).toFixed(1) + ' MB';
                     document.getElementById('net-recv').textContent = (d.network_recv / 1024 / 1024).toFixed(1) + ' MB';
+                    
+                    // Update header timestamp
                     document.getElementById('time').textContent = new Date().toLocaleTimeString();
                     
+                    // Add new data point to real-time arrays
                     rtData.cpu.push(d.cpu_percent);
                     rtData.mem.push(d.memory_percent);
                     rtData.labels.push(new Date().toLocaleTimeString());
+                    
+                    // Maintain only the last 15 points
                     if (rtData.cpu.length > 15) {
                         rtData.cpu.shift();
                         rtData.mem.shift();
                         rtData.labels.shift();
                     }
+                    
+                    // Redraw real-time chart
                     rtChart.data.labels = rtData.labels;
                     rtChart.data.datasets[0].data = rtData.cpu;
                     rtChart.data.datasets[1].data = rtData.mem;
                     rtChart.update('none');
                 }
 
-                // History
+                // 2. Fetch historical logs
                 const histRes = await fetch('/api/history');
                 const hist = await histRes.json();
                 if (hist && !hist.error && hist.length > 0) {
@@ -410,20 +571,22 @@
                     histChart.update('none');
                 }
 
-                // Cores
+                // 3. Fetch CPU Core utilization list
                 const coresRes = await fetch('/api/cpu-cores');
                 const cores = await coresRes.json();
                 if (cores && !cores.error) {
                     document.getElementById('cores').innerHTML = cores.cores.map(c => `
                         <div class="core-item">
                             <span style="min-width: 55px; font-weight: 600;">Core ${c.core}</span>
-                            <div class="core-bar"><div class="core-fill" style="width: ${c.usage}%;"></div></div>
-                            <span style="min-width: 50px; text-align: right; font-weight: 600; color: #667eea;">${c.usage.toFixed(1)}%</span>
+                            <div class="core-bar">
+                                <div class="core-fill" style="width: ${c.usage}%;"></div>
+                            </div>
+                            <span style="min-width: 50px; text-align: right; font-weight: 600; color: #2b6cb0;">${c.usage.toFixed(1)}%</span>
                         </div>
                     `).join('');
                 }
 
-                // Memory
+                // 4. Fetch memory breakdown details
                 const memRes = await fetch('/api/memory-details');
                 const mem = await memRes.json();
                 if (mem && !mem.error) {
@@ -436,7 +599,7 @@
                     document.getElementById('mem-used').textContent = mem.used_gb + ' GB';
                 }
 
-                // Processes
+                // 5. Fetch top process statistics
                 const procRes = await fetch('/api/processes');
                 const procs = await procRes.json();
                 if (procs && !procs.error) {
@@ -444,14 +607,14 @@
                         <tr>
                             <td style="font-family: monospace;">${p.pid}</td>
                             <td>${p.name}</td>
-                            <td style="color: ${p.cpu > 30 ? '#ef4444' : '#10b981'}; font-weight: 600;">${p.cpu.toFixed(1)}%</td>
-                            <td style="color: ${p.memory > 5 ? '#ef4444' : '#10b981'}; font-weight: 600;">${p.memory.toFixed(2)}%</td>
-                            <td><span style="background: #2d3748; padding: 4px 10px; border-radius: 5px; font-size: 11px;">${p.status}</span></td>
+                            <td style="color: ${p.cpu > 30 ? '#e53e3e' : '#2f855a'}; font-weight: 600;">${p.cpu.toFixed(1)}%</td>
+                            <td style="color: ${p.memory > 5 ? '#e53e3e' : '#2f855a'}; font-weight: 600;">${p.memory.toFixed(2)}%</td>
+                            <td><span style="background-color: #edf2f7; color: #4a5568; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${p.status}</span></td>
                         </tr>
                     `).join('');
                 }
 
-                // Alerts
+                // 6. Fetch recent database warning alerts
                 const alertRes = await fetch('/api/alerts');
                 const alerts = await alertRes.json();
                 if (alerts && !alerts.error && alerts.length > 0) {
@@ -461,10 +624,10 @@
                         </div>
                     `).join('');
                 } else {
-                    document.getElementById('alerts').innerHTML = '<div class="alert alert-info">No alerts - System running normally</div>';
+                    document.getElementById('alerts').innerHTML = '<div class="alert alert-info">No alerts triggered - System operating normally.</div>';
                 }
 
-                // Database Records
+                // 7. Fetch recent raw database rows logged
                 const dbRes = await fetch('/api/database-records');
                 const dbRecords = await dbRes.json();
                 if (dbRecords && !dbRecords.error) {
@@ -472,9 +635,9 @@
                         <tr>
                             <td style="font-family: monospace;">${r.id}</td>
                             <td>${new Date(r.timestamp).toLocaleString()}</td>
-                            <td style="color: ${r.cpu > 70 ? '#ef4444' : '#10b981'}; font-weight: 600;">${r.cpu.toFixed(1)}%</td>
-                            <td style="color: ${r.memory > 70 ? '#ef4444' : '#10b981'}; font-weight: 600;">${r.memory.toFixed(1)}%</td>
-                            <td style="color: ${r.disk > 70 ? '#ef4444' : '#10b981'}; font-weight: 600;">${r.disk.toFixed(1)}%</td>
+                            <td style="color: ${r.cpu > 70 ? '#e53e3e' : '#2f855a'}; font-weight: 600;">${r.cpu.toFixed(1)}%</td>
+                            <td style="color: ${r.memory > 70 ? '#e53e3e' : '#2f855a'}; font-weight: 600;">${r.memory.toFixed(1)}%</td>
+                            <td style="color: ${r.disk > 70 ? '#e53e3e' : '#2f855a'}; font-weight: 600;">${r.disk.toFixed(1)}%</td>
                             <td>${(r.network_sent / 1024 / 1024).toFixed(2)} MB</td>
                             <td>${(r.network_recv / 1024 / 1024).toFixed(2)} MB</td>
                         </tr>
@@ -482,14 +645,16 @@
                 }
 
             } catch (err) {
-                console.error('Error:', err);
+                console.error('Error fetching dashboard update data:', err);
             }
         }
 
+        // Run setup when the page fully loads
         document.addEventListener('DOMContentLoaded', () => {
             initCharts();
-            update();
-            setInterval(update, 2000);
+            updateDashboard();
+            // Pull data from APIs every 2 seconds
+            setInterval(updateDashboard, 2000);
         });
     </script>
 </body>
